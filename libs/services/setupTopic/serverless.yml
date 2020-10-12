@@ -1,0 +1,44 @@
+service: setUpTopic
+
+frameworkVersion: '2'
+
+plugins:
+  - serverless-jest-plugin
+
+custom:
+  allowHeaders:
+    - Accept
+    - Content-Type
+    - Content-Length
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: eu-west-2
+  stage: prod
+  memorySize: 128
+  timeout: 5
+  endpoint: regional
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sns:CreateTopic
+        - sns:Subscribe
+      Resource: '*'
+      Condition:
+        StringLike:
+          SNS:Endpoint: '*@example.com'
+        StringEquals:
+          sns:Protocol: email
+
+functions:
+  setupTopic:
+    handler: handler.handler
+    description: setup new topic if required and add subscriber to it
+    events:
+      - http:
+          path: subscribe
+          method: post
+          cors:
+            origin: '*'
+            headers: '${self:custom.allowHeaders}'
