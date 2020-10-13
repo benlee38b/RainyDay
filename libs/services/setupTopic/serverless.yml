@@ -19,6 +19,8 @@ provider:
   memorySize: 128
   timeout: 5
   endpoint: regional
+  environment:
+    CITY_TABLE: city-table-${opt:stage, self:provider.stage}
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -30,6 +32,11 @@ provider:
           SNS:Endpoint: '*@example.com'
         StringEquals:
           sns:Protocol: email
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CITY_TABLE}'
 
 functions:
   setupTopic:
@@ -49,7 +56,7 @@ resources:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: Retain
       Properties:
-        TableName: ${self:provider.stage}-cityTable
+        TableName: ${self:provider.environment.CITY_TABLE}
         AttributeDefinitions:
           - AttributeName: city
             AttributeType: S
