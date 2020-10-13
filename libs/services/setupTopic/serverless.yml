@@ -42,3 +42,20 @@ functions:
           cors:
             origin: '*'
             headers: '${self:custom.allowHeaders}'
+
+resources:
+  Resources:
+    CityTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties:
+        TableName: ${self:provider.stage}-cityTable
+        AttributeDefinitions:
+          - AttributeName: city
+            AttributeType: S
+        KeySchema:
+          - AttributeName: city
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
