@@ -73,8 +73,8 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-    DeadLetterSQSQueueSQueue:
+    DeadLetterSQSQueue:
       Type: 'AWS::SQS::Queue'
       Properties:
-        QueueName: sqs-rainyDay-${opt:stage, self:provider.stage}-DLQ
+        QueueName: sqs-rainyDay-DLQ-${opt:stage, self:provider.stage}.fifo
         FifoQueue: true
