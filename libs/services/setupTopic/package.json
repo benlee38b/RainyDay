@@ -2,11 +2,16 @@
   "name": "setuptopic",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
   "main": "createTopic.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.771.0"
+  },
+  "devDependencies": {
+    "serverless-ignore": "^0.1.5"
+  }
 }

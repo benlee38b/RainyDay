@@ -1,6 +1,7 @@
-import AWS from '../../libs/aws-sdk';
+const AWS = require('aws-sdk');
 const docClient = new AWS.DynamoDB.DocumentClient();
 const tableName = process.env.CITY_TABLE;
+AWS.config.update({ region: 'eu-west-2' });
 
 exports.putCity = async (city) => {
   let params = {
@@ -15,7 +16,7 @@ exports.putCity = async (city) => {
       let data = await docClient.put(params);
       return true;
     } else return false;
-  } catch (error) {
+  } catch (err) {
     console.log('ERROR', err);
   }
 };
