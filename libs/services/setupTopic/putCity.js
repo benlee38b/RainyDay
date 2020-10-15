@@ -14,7 +14,8 @@ exports.putCity = async (city) => {
     let existingCity = await docClient.get(params).promise();
     if (!existingCity) {
       let data = await data.put(params);
-    }
+      return true;
+    } else return false;
   } catch (error) {
     console.log('ERROR', err);
   }
