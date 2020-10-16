@@ -1,0 +1,49 @@
+service: notifySubscribers
+
+frameworkVersion: '2'
+
+plugins:
+  - serverless-jest-plugin
+
+custom:
+  allowHeaders:
+    - Accept
+    - Content-Type
+    - Content-Length
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: eu-west-2
+  stage: prod
+  memorySize: 128
+  timeout: 5
+  endpoint: regional
+  environment:
+    CITY_TABLE: city-table-${opt:stage, self:provider.stage}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - sns:Publish
+      Resource: '*'
+    - Effect: Allow
+      Action:
+        - dynamodb:Scan
+      Resource: 'arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.CITY_TABLE}'
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+      Resource: 'arn:aws:lambda:${opt:region, self:provider.region}:*:function:${self:service}-${opt:stage, self:provider.stage}-PublishMessageToTopic'
+
+functions:
+  ScanDynamoDB:
+    handler: handler.handler
+    description: retrieve all cities with associated topics
+    events:
+      - schedule:
+          name: rainy-day-assessment-event
+          rate: cron(0 0 7 * * ?)
+
+  PublishMessageToTopic:
+    handler: publishMessageToTopic
+    description: publishMessageToTopic

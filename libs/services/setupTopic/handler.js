@@ -40,11 +40,13 @@ exports.handler = async (event) => {
       data = await sns.subscribe(subscribeParams).promise();
     }
     console.log('subscribe data:', data);
-    return {
-      statusCode: 200,
-      headers: util.getResponseHeaders(),
-      body: JSON.stringify({ message: 'Successfully subscribed!' }),
-    };
+    if (data.SubscriptionArn === 'pending confirmation') {
+      return {
+        statusCode: 200,
+        headers: util.getResponseHeaders(),
+        body: JSON.stringify({ message: 'Successfully subscribed!' }),
+      };
+    } else throw err;
   } catch (err) {
     console.log('ERROR', err);
     return {
