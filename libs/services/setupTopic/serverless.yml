@@ -34,11 +34,11 @@ provider:
         - sns:CreateTopic
         - sns:Subscribe
       Resource: '*'
-      Condition:
-        StringLike:
-          SNS:Endpoint: '*@example.com'
-        StringEquals:
-          sns:Protocol: email
+      # Condition:
+      #   StringLike:
+      #     SNS:Endpoint: '*@example.com'
+      #   StringEquals:
+      #     sns:Protocol: email
     - Effect: Allow
       Action:
         - dynamodb:GetItem
@@ -49,6 +49,10 @@ provider:
         - sqs:*
       Resource:
         Fn::GetAtt: [DeadLetterSQSQueue, Arn]
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+      Resource: 'arn:aws:lambda:${opt:region, self:provider.region}:*:function:${self:service}-${opt:stage, self:provider.stage}-putCity'
 
 functions:
   createTopic:
@@ -61,14 +65,6 @@ functions:
           cors:
             origin: '*'
             headers: '${self:custom.allowHeaders}'
-    Policies:
-      - Statement:
-          - Sid: invokePutFunctionPolicy
-            Effect: Allow
-            Action:
-              - lambda:InvokeFunction
-            Resource:
-              Fn::GetAtt: [putCity, Arn]
   putCity:
     handler: putCity.handler
     description: add city to dynamodb if not previously added
@@ -92,5 +88,4 @@ resources:
     DeadLetterSQSQueue:
       Type: 'AWS::SQS::Queue'
       Properties:
-        QueueName: sqs-rainyDay-DLQ-${opt:stage, self:provider.stage}.fifo
-        FifoQueue: true
+        QueueName: sqs-rainyDay-DLQ-${opt:stage, self:provider.stage}

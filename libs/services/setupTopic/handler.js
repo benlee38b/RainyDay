@@ -1,8 +1,7 @@
 const util = require('./util');
 const AWS = require('aws-sdk');
-const lambda = new AWS.Lambda({
-  region: 'eu-west-2',
-});
+AWS.config.update({ region: 'eu-west-2' });
+const Lambda = new AWS.Lambda();
 const sns = new AWS.SNS();
 
 exports.handler = async (event) => {
@@ -18,26 +17,33 @@ exports.handler = async (event) => {
     InvocationType: 'RequestResponse',
     Payload: JSON.stringify({ body: { city } }),
   };
+  console.log('lambdaparams: ', lambdaParams);
+  let DLQ_ARN = process.env.DLQ_ARN;
+  let RedrivePolicy = { deadLetterTargetArn: DLQ_ARN };
 
   let subscribeParams = {
     Protocol: 'email',
-    TopicArn: `arn:aws:sns:eu-west-2:*:${city}`,
+    TopicArn: `arn:aws:sns:eu-west-2:209148561688:${city}`,
     Endpoint: email,
-    RedrivePolicy: { deadLetterTargetArn: process.env.DLQ_ARN },
+    Attributes: {
+      RedrivePolicy: JSON.stringify(RedrivePolicy),
+    },
   };
   let data;
   try {
-    if (await lambda.invoke(lambdaParams).promise()) {
+    const topicExists = await Lambda.invoke(lambdaParams).promise();
+    if (topicExists) {
       await sns.createTopic(createParams).promise();
-      data = await sns.subscribe(subscribeParams);
+      console.log('before subscribe');
+      data = await sns.subscribe(subscribeParams).promise();
     } else {
-      data = await sns.subscribe(subscribeParams);
+      data = await sns.subscribe(subscribeParams).promise();
     }
-    console.log(data);
+    console.log('subscribe data:', data);
     return {
       statusCode: 200,
       headers: util.getResponseHeaders(),
-      body: JSON.stringify({ message: 'Successfully subscribed!', data: data }),
+      body: JSON.stringify({ message: 'Successfully subscribed!' }),
     };
   } catch (err) {
     console.log('ERROR', err);
