@@ -27,6 +27,7 @@ provider:
     CITY_TABLE: city-table-${opt:stage, self:provider.stage}
     DLQ_ARN:
       Fn::GetAtt: [DeadLetterSQSQueue, Arn]
+    PUT_CITY_LAMBDA_NAME: ${self:service}-${opt:stage, self:provider.stage}-putCity
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -50,9 +51,9 @@ provider:
         Fn::GetAtt: [DeadLetterSQSQueue, Arn]
 
 functions:
-  setupTopic:
+  createTopic:
     handler: handler.handler
-    description: setup new topic if required and add subscriber to it
+    description: create new topic if required and add subscriber to it
     events:
       - http:
           path: subscribe
@@ -60,6 +61,17 @@ functions:
           cors:
             origin: '*'
             headers: '${self:custom.allowHeaders}'
+    Policies:
+      - Statement:
+          - Sid: invokePutFunctionPolicy
+            Effect: Allow
+            Action:
+              - lambda:InvokeFunction
+            Resource:
+              Fn::GetAtt: [putCity, Arn]
+  putCity:
+    handler: putCity.handler
+    description: add city to dynamodb if not previously added
 
 resources:
   Resources:

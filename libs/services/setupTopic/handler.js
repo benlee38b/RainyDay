@@ -1,5 +1,9 @@
 const util = require('./util');
-const putCity = require('./putCity');
+const AWS = require('aws-sdk');
+const lambda = new AWS.Lambda({
+  region: 'eu-west-2',
+});
+const sns = new AWS.SNS();
 
 exports.handler = async (event) => {
   let email = JSON.parse(event.body).email;
@@ -8,6 +12,11 @@ exports.handler = async (event) => {
 
   let createParams = {
     Name: city,
+  };
+  const lambdaParams = {
+    FunctionName: process.env.PUT_CITY_LAMBDA_NAME,
+    InvocationType: 'RequestResponse',
+    Payload: JSON.stringify({ body: { city } }),
   };
 
   let subscribeParams = {
@@ -18,7 +27,7 @@ exports.handler = async (event) => {
   };
   let data;
   try {
-    if (await putCity(city).promise()) {
+    if (await lambda.invoke(lambdaParams).promise()) {
       await sns.createTopic(createParams).promise();
       data = await sns.subscribe(subscribeParams);
     } else {

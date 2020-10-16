@@ -3,7 +3,8 @@ const docClient = new AWS.DynamoDB.DocumentClient();
 const tableName = process.env.CITY_TABLE;
 AWS.config.update({ region: 'eu-west-2' });
 
-exports.putCity = async (city) => {
+exports.handler = async (event) => {
+  let city = JSON.parse(event.body).city;
   let params = {
     TableName: tableName,
     Item: {
