@@ -34,11 +34,6 @@ provider:
         - sns:CreateTopic
         - sns:Subscribe
       Resource: '*'
-      # Condition:
-      #   StringLike:
-      #     SNS:Endpoint: '*@example.com'
-      #   StringEquals:
-      #     sns:Protocol: email
     - Effect: Allow
       Action:
         - dynamodb:GetItem

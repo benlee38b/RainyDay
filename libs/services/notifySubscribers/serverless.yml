@@ -21,6 +21,8 @@ provider:
   endpoint: regional
   environment:
     CITY_TABLE: city-table-${opt:stage, self:provider.stage}
+    PUBLISH_MESSAGE_LAMBDA_NAME: ${self:service}-${opt:stage, self:provider.stage}-PublishMessageToTopic
+    WEATHER_API_KEY: 6fa7c41ae8724c3e9f2153649200910
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -37,12 +39,11 @@ provider:
 
 functions:
   ScanDynamoDB:
-    handler: handler.handler
+    handler: scanTable.handler
     description: retrieve all cities with associated topics
     events:
       - schedule:
-          name: rainy-day-assessment-event
-          rate: cron(0 0 7 * * ?)
+          rate: cron(00 7 * * ? *)
 
   PublishMessageToTopic:
     handler: publishMessageToTopic
