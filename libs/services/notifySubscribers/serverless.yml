@@ -23,6 +23,7 @@ provider:
     CITY_TABLE: city-table-${opt:stage, self:provider.stage}
     PUBLISH_MESSAGE_LAMBDA_NAME: ${self:service}-${opt:stage, self:provider.stage}-PublishMessageToTopic
     WEATHER_API_KEY: 6fa7c41ae8724c3e9f2153649200910
+    ACCOUNT_ID: '209148561688'
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -46,5 +47,5 @@ functions:
           rate: cron(00 7 * * ? *)
 
   PublishMessageToTopic:
-    handler: publishMessageToTopic
+    handler: publishMessageToTopic.handler
     description: publishMessageToTopic

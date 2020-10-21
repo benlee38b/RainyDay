@@ -28,6 +28,7 @@ provider:
     DLQ_ARN:
       Fn::GetAtt: [DeadLetterSQSQueue, Arn]
     PUT_CITY_LAMBDA_NAME: ${self:service}-${opt:stage, self:provider.stage}-putCity
+
   iamRoleStatements:
     - Effect: Allow
       Action:
