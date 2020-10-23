@@ -4,6 +4,7 @@ frameworkVersion: '2'
 
 plugins:
   - serverless-jest-plugin
+  - serverless-plugin-tracing
 
 custom:
   allowHeaders:
@@ -18,6 +19,7 @@ provider:
   stage: prod
   memorySize: 128
   timeout: 5
+  tracing: true
   endpoint: regional
   environment:
     CITY_TABLE: city-table-${opt:stage, self:provider.stage}
@@ -36,15 +38,21 @@ provider:
     - Effect: Allow
       Action:
         - lambda:InvokeFunction
-      Resource: 'arn:aws:lambda:${opt:region, self:provider.region}:*:function:${self:service}-${opt:stage, self:provider.stage}-PublishMessageToTopic'
+      Resource: '*'
+    - Effect: 'Allow' # xray permissions (required)
+      Action:
+        - 'xray:PutTraceSegments'
+        - 'xray:PutTelemetryRecords'
+      Resource:
+        - '*'
 
 functions:
   ScanDynamoDB:
     handler: scanTable.handler
+    warmup: false
     description: retrieve all cities with associated topics
     events:
-      - schedule:
-          rate: cron(00 7 * * ? *)
+      - schedule: cron(00 7 * * ? *)
 
   PublishMessageToTopic:
     handler: publishMessageToTopic.handler

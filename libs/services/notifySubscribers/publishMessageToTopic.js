@@ -27,6 +27,7 @@ exports.handler = async (event) => {
   try {
     let data = await sns.publish(params).promise();
     if (data.MessageId) {
+      console.log(data);
       return {
         message: 'Message published successfully',
       };
@@ -34,6 +35,4 @@ exports.handler = async (event) => {
   } catch (error) {
     console.log(error);
   }
-
-  console.log(data);
 };
