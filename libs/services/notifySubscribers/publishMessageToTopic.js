@@ -7,10 +7,6 @@ const sns = new AWS.SNS();
 exports.handler = async (event) => {
   let { dailyChanceOfRain, totalPrecip, city } = event.body;
 
-  console.log('body:', event.body);
-
-  console.log(dailyChanceOfRain, totalPrecip, city);
-
   let message;
 
   if (dailyChanceOfRain > 75) {
